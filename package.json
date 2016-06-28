@@ -3,13 +3,8 @@
   "version": "0.0.2",
   "description": "Librería para crear extensiones de Domoto CLI",
   "main": "index.js",
-  "keywords": [
-    "domotica"
-  ],
+  "keywords": [ "domotica", "domoto" ],
   "author": "Jose Lobo",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@gitlab.com/jloboprs/domoto.git"
