@@ -6,14 +6,24 @@ module.exports = class ImportTemplate extends EventEmitter {
 
     this.document = null;
     this.container = document.createElement('div');
-    this.link = document.createElement('link');
-    this.link.href = path;
-    this.link.rel = 'import';
-    this.link.onload = (e) => this._onLoad(e);
-    this.link.onerror = (e) => this._onError(e);
-    this.link.setAttribute('async', '');
+    this._link = document.createElement('link');
+    this._link.href = path;
+    this._link.rel = 'import';
+    this._link.setAttribute('async', '');
+    this._link.onload = (e) => this._onLoad(e);
+    this._link.onerror = (e) => this._onError(e);
 
-    document.head.appendChild(this.link);
+    document.head.appendChild(this._link);
+  }
+
+  _onLoad() {
+    const template = this._link.import.querySelector('template');
+    this.document = document.importNode(template.content, true);
+    this.emit('load', this.document);
+  }
+
+  _onError(e) {
+    this.emit('error', new Error(`No se pudo cargar el recurso "${e.target.href}"`));
   }
 
   add(root) {
@@ -34,13 +44,23 @@ module.exports = class ImportTemplate extends EventEmitter {
     this.container.classList.toggle('hide');
   }
 
-  _onLoad() {
-    const template = this.link.import.querySelector('template');
-    this.document = document.importNode(template.content, true);
-    this.emit('load', this.document);
+  getElementById(id) {
+    return this.document.getElementById(id);
   }
 
-  _onError(e) {
-    this.emit('error', new Error(`No se pudo cargar el recurso "${e.target.href}"`));
+  getElementsByTagName(tagName) {
+    return this.document.getElementsByTagName(tagName);
+  }
+
+  getElementByClassName(className) {
+    return this.document.getElementByClassName(className);
+  }
+
+  querySelectorAll(selector) {
+    return this.document.querySelectorAll(selector);
+  }
+
+  querySelector(selector) {
+    return this.document.querySelector(selector);
   }
 };
