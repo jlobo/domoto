@@ -5,37 +5,49 @@ module.exports = class ItemMenu extends EventEmitter {
   constructor(code) {
     super();
 
-    this.code = code;
-    this.confirm = Confirm.instance;
     this._bodyElement = null;
-    this._element = document.createElement('li');
-    this._element.classList.add('bold');
-    this._element.innerHTML = '<div class="collapsible-header waves-effect waves-light truncate"></div>';
-    this._header = this._element.firstElementChild;
+    this._confirm = Confirm.instance;
+
+    this.code = code;
+    this.element = document.createElement('li');
+    this.element.classList.add('bold');
+    this.element.innerHTML = '<div class="collapsible-header waves-effect waves-light truncate"> </div>';
+    this._header = this.element.firstElementChild;
+    this._description = this._header.firstChild;
     this._header.addEventListener('click', e => this.emit('click', e));
   }
 
-  setHeader(text, icons) {
-    this._header.innerHTML = [icons && icons.left ? this._getIconHeader(icons.left) : '',
-      icons && icons.right ? this._getIconHeader(icons.right, true) : '',
-      text].join('');
+  get description() {
+    return this._description.textContent;
+  }
 
-    return this;
+  set description(value) {
+    this._description.textContent = value;
+  }
+
+  set leftIconOn(value) {
+    this._setIconOn(this._iconLeft, value);
+  }
+
+  set rightIconOn(value) {
+    this._setIconOn(this._iconLeft, value);
+  }
+
+  addLeftIcon(icon) {
+    this._addIcon(icon, false);
+  }
+
+  addRightIcon(icon) {
+    this._addIcon(icon, true);
   }
 
   add(root, first = false) {
-    if (first) {
-      root.insertBefore(this._element, root.children[1]);
-      this._element = root.firstElementChild;
-    }
-    else {
-      root.appendChild(this._element);
-      this._element = root.lastElementChild;
-    }
+    first ? root.insertBefore(this.element, root.children[1])
+      : root.appendChild(this.element);
   }
 
   remove() {
-    this._element.remove();
+    this.element.remove();
   }
 
   setRemoveBody() {
@@ -61,17 +73,31 @@ module.exports = class ItemMenu extends EventEmitter {
     return this._bodyElement;
   }
 
-  _setBody(...items) {
-    const ul = this._body.appendChild(document.createElement('ul'));
-    ul.innerHTML = items.map(item => `<li><a href="#!">${item}</a></li>`).join('');
+  _setIconOn(iconElement, on) {
+    iconElement.classList.remove('light-green-text');
+    iconElement.classList.remove('text-accent-3');
+
+    if (on) {
+      iconElement.classList.add('light-green-text');
+      iconElement.classList.add('text-accent-3');
+    }
   }
 
-  _getIconHeader(icon, right = false) {
-    return `<i class="material-icons ${right ? 'secondary-content' : null}">${icon}</i>`;
+  _addIcon(icon, right = false) {
+    const iconElement = document.createElement('i');
+    iconElement.classList.add('material-icons');
+    iconElement.innerText = icon;
+    this._header.appendChild(iconElement);
+
+    if (!right)
+      return (this._iconLeft = iconElement);
+
+    this._iconRight = iconElement;
+    iconElement.classList.add('secondary-content');
   }
 
   _onClickRemove(e) {
-    this.confirm('¿Estas seguro de querer eliminar la extensión?', 'Extensiones')
+    this._confirm('¿Estas seguro de querer eliminar la extensión?', 'Extensiones')
       .on('confirm', () => this.emit('remove', e, this.code));
   }
 };
