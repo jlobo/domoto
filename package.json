@@ -1,8 +1,8 @@
 {
   "name": "domoto",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Librería para crear extensiones de Domoto CLI",
-  "main": "index.js",
+  "main": "domoto.js",
   "keywords": [ "domotica", "domoto" ],
   "author": "Jose Lobo",
   "repository": {

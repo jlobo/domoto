@@ -20,9 +20,9 @@ module.exports = class Confirm {
   }
 
   static get instance() {
-  if (!window.Materialize)
-    return require('./confirmNative').instance;
-    
+    if (!window.Materialize)
+      return require('./confirmNative').instance;
+
     if (!this[singleton])
       this[singleton] = new Confirm(singletonEnforcer);
 

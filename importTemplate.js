@@ -31,6 +31,10 @@ module.exports = class ImportTemplate extends EventEmitter {
     root.appendChild(this.container);
   }
 
+  remove() {
+    this.container.remove();
+  }
+
   show() {
     this.container.classList.remove('hide');
   }
