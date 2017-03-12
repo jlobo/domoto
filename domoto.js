@@ -1,18 +1,23 @@
 const ImportTemplate = require('domoto/importTemplate');
+const ViewManager = require('./viewManager');
 const ItemMenu = require('domoto/itemMenu');
 const EventEmitter = require('events');
 const Confirm = require('./confirm');
 
 module.exports = class Domoto extends EventEmitter {
-  constructor(name, templatePath, controllerClass) {
+  constructor(name, templatePath, controller) {
     super();
 
-    this.controller = null;
     this.name = name;
-    this._confirm = Confirm.instance;
-    this.body = new ImportTemplate(templatePath);
-    this.body.on('load', () => this._onLoad(controllerClass));
+    this.viws = [];
+    this.items = [];
+    this.controllers = [];
+    this.confirm = Confirm.instance;
     this.itemMenu = new ItemMenu(this._itemMenuDescription);
+    this.body = this.addView(templatePath, controller, this.itemMenu);
+    this.viewManager = ViewManager.instance;
+
+    this.itemMenu.on('click', this.viewManager.add(this, this.body));
 
     if (this._itemMenuIcon)
       this.itemMenu.iconLeft = this._itemMenuIcon;
@@ -35,13 +40,29 @@ module.exports = class Domoto extends EventEmitter {
     return true;
   }
 
+  addView(path, controller, ...params) {
+    const view = new ImportTemplate(path);
+    view.on('load', () => this._onLoad(view, controller, ...params));
+    this.viws.push(view);
+    return view;
+  }
+
+  remove() {
+    this.body.remove();
+    this.itemMenu.remove();
+    this.viewManager.remove(this);
+  }
+
   _onRemove(name) {
-    this._confirm(`¿Estas seguro de querer eliminar la extensión "${name}"?`, 'Extensiones')
+    this.confirm(`¿Estas seguro de querer eliminar la extensión "${name}"?`, 'Extensiones')
       .on('confirm', () => this.emit('remove', this));
   }
 
-  _onLoad(controller) {
-    this.controller = new controller(this.body, this.itemMenu);
-    this.emit('ready', this);
+  _onLoad(view, controller, ...params) {
+    view.hide();
+    if (controller)
+      this.controllers.push(new controller(view, ...params));
+
+    this.emit('load', view);
   }
 };
