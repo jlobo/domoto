@@ -3,6 +3,7 @@ const ViewManager = require('./viewManager');
 const ItemMenu = require('domoto/itemMenu');
 const EventEmitter = require('events');
 const Confirm = require('./confirm');
+const Module = require('./module');
 
 module.exports = class Domoto extends EventEmitter {
   constructor(name) {
@@ -13,6 +14,7 @@ module.exports = class Domoto extends EventEmitter {
     this.items = new Set();
     this.controllers = new Set();
     this.confirm = Confirm.instance;
+    this.module = Module.instance;
     this.viewManager = ViewManager.instance;
     this.itemMenu = new ItemMenu(name);
     this.itemMenu.iconLeft = 'power_settings_new';
@@ -46,6 +48,14 @@ module.exports = class Domoto extends EventEmitter {
     this.itemMenu.remove();
     this.viewManager.hide(...this.views);
     this.views.forEach(view => view.remove());
+  }
+
+  exportModule(module) {
+    this.module.export(this.name, module);
+  }
+
+  getModule(name) {
+    return this.module.get(name);
   }
 
   _onRemove(name) {
