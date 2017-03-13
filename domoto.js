@@ -5,52 +5,47 @@ const EventEmitter = require('events');
 const Confirm = require('./confirm');
 
 module.exports = class Domoto extends EventEmitter {
-  constructor(name, templatePath, controller) {
+  constructor(name) {
     super();
 
     this.name = name;
-    this.viws = [];
-    this.items = [];
-    this.controllers = [];
+    this.views = new Set();
+    this.items = new Set();
+    this.controllers = new Set();
     this.confirm = Confirm.instance;
-    this.itemMenu = new ItemMenu(this._itemMenuDescription);
-    this.body = this.addView(templatePath, controller, this.itemMenu);
     this.viewManager = ViewManager.instance;
+    this.itemMenu = new ItemMenu(name);
+    this.itemMenu.iconLeft = 'power_settings_new';
 
-    this.itemMenu.on('click', this.viewManager.add(this, this.body));
-
-    if (this._itemMenuIcon)
-      this.itemMenu.iconLeft = this._itemMenuIcon;
-
-    if (this._canRemoveItemMenu) {
+    if (this.isRemovable) {
       this.itemMenu.setRemove();
       this.itemMenu.on('remove', () => this._onRemove(name));
     }
   }
 
-  get _itemMenuDescription() {
-    return this.name;
-  }
-
-  get _itemMenuIcon() {
-    return 'power_settings_new';
-  }
-
-  get _canRemoveItemMenu() {
+  get isRemovable() {
     return true;
+  }
+
+  get description() {
+    return this.itemMenu.description;
+  }
+
+  set description(value) {
+    this.itemMenu.description = value;
   }
 
   addView(path, controller, ...params) {
     const view = new ImportTemplate(path);
     view.on('load', () => this._onLoad(view, controller, ...params));
-    this.viws.push(view);
+    this.views.add(view);
     return view;
   }
 
   remove() {
-    this.body.remove();
     this.itemMenu.remove();
-    this.viewManager.remove(this);
+    this.viewManager.hide(...this.views);
+    this.views.forEach(view => view.remove());
   }
 
   _onRemove(name) {
@@ -61,7 +56,7 @@ module.exports = class Domoto extends EventEmitter {
   _onLoad(view, controller, ...params) {
     view.hide();
     if (controller)
-      this.controllers.push(new controller(view, ...params));
+      this.controllers.add(new controller(view, ...params));
 
     this.emit('load', view);
   }

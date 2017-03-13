@@ -6,8 +6,8 @@ module.exports = class ViewManager {
     if (enforcer !== singletonEnforcer)
       throw new Error('Cannot construct singleton');
 
-    this.visible = { extension: null, view: null };
-    this.views = new Map();
+    this.visible = null;
+    this.views = new Set();
   }
 
   static get instance() {
@@ -17,33 +17,27 @@ module.exports = class ViewManager {
     return this[singleton];
   }
 
-  remove(extension) {
-    this.views.delete(extension);
-    if (this.visible.extension !== extension)
-      return;
+  setVisible(view) {
+    if (this.visible)
+      this.visible.hide();
 
-    extension = this.views.keys().next().value;
-    this.show(extension, this.views.get(extension)[0]);
-  }
-
-  show(extension, view) {
-    if (this.visible.view)
-      this.visible.view.hide();
-
-    this.visible.extension = extension;
-    this.visible.view = view;
+    this.visible = view;
     view.show();
   }
 
-  add(extension, view) {
-    if (!this.visible.view)
-      view.once('load', () => this.show(extension, view));
+  show(view) {
+    if (!this.visible)
+      view.once('load', () => this.setVisible(view));
 
-    if (this.views.has(extension))
-      this.views.get(extension).push(view);
-    else
-      this.views.set(extension, [view]);
+    this.views.add(view);
+    return this.setVisible.bind(this, view);
+  }
 
-    return this.show.bind(this, extension, view);
+  hide(...views) {
+    views.forEach(view => this.views.delete(view));
+    if (views.every(view => view !== this.visible))
+      return;
+
+    this.setVisible(this.views.values().next().value);
   }
 };
