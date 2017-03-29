@@ -7,7 +7,7 @@ module.exports = class ItemMenu extends ElementMenu {
     this._childElements = null;
   }
 
-  addChild(childItemMenu) {
+  add(childItemMenu) {
     this.childElements.appendChild(childItemMenu.element);
     return childItemMenu;
   }

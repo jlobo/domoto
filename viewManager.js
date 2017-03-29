@@ -26,10 +26,10 @@ module.exports = class ViewManager {
   }
 
   show(view) {
-    if (!this.visible)
-      view.once('load', () => this.setVisible(view));
-
     this.views.add(view);
+    if (!this.visible)
+      this.setVisible(view);
+
     return this.setVisible.bind(this, view);
   }
 
