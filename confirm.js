@@ -32,7 +32,7 @@ module.exports = class Confirm {
   show(message = '¿Estas seguro?', title = 'Confirmación') {
     this._header.innerText = title;
     this._message.innerText = message;
-    this._modal.openModal();
+    this._modal.modal('open');
 
     return (this._emitter = new EventEmitter());
   }
@@ -40,6 +40,7 @@ module.exports = class Confirm {
   _configure() {
     document.body.appendChild(this._modal);
     this._modal = $(document.body.lastElementChild);
+    this._modal.modal();
 
     this._cancel.addEventListener('click', e => this._onClick(e, 'cancel'));
     this._confirm.addEventListener('click', e => this._onClick(e, 'confirm'));
@@ -61,7 +62,7 @@ module.exports = class Confirm {
   }
 
   _onClick(e, event) {
-    this._modal.closeModal();
+    this._modal.modal('close');
     this._emitter.emit(event, e);
   }
 };
