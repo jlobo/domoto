@@ -59,7 +59,7 @@ module.exports = class Domoto extends EventEmitter {
   }
 
   _onRemove(name) {
-    this.confirm(`¿Estas seguro de querer eliminar la extensión "${name}"?`, 'Extensiones')
+    this.confirm(`Are you sure you want to delete the extension "${name}"?`, 'Extensions')
       .on('confirm', () => this.emit('remove', this));
   }
 
