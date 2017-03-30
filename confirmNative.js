@@ -17,8 +17,8 @@ module.exports = class ConfirmNative {
   }
 
   interval(message) {
-    var isOk = confirm(message); 
-    this._emitter.emit(isOk ? 'confirm' : 'cancel', this)
+    const isOk = confirm(message);
+    this._emitter.emit(isOk ? 'confirm' : 'cancel', this);
   }
 
   static get instance() {

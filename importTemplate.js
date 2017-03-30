@@ -4,8 +4,7 @@ module.exports = class ImportTemplate extends EventEmitter {
   constructor(path) {
     super();
 
-    this.document = null;
-    this.container = document.createElement('div');
+    this.document = document.createElement('div');
     this._link = document.createElement('link');
     this._link.href = path;
     this._link.rel = 'import';
@@ -16,48 +15,33 @@ module.exports = class ImportTemplate extends EventEmitter {
     document.head.appendChild(this._link);
   }
 
-  _onLoad() {
-    const template = this._link.import.querySelector('template');
-    this.document = document.importNode(template.content, true);
-    this.emit('load', this.document);
-  }
-
-  _onError(e) {
-    this.emit('error', new Error(`No se pudo cargar el recurso "${e.target.href}"`));
-  }
-
   add(root) {
-    this.container.appendChild(this.document);
-    root.appendChild(this.container);
+    root.appendChild(this.document);
   }
 
   remove() {
-    this.container.remove();
+    this.document.remove();
   }
 
   show() {
-    this.container.classList.remove('hide');
+    this.document.classList.remove('hide');
   }
 
   hide() {
-    if (!this.container.classList.contains('hide'))
-      this.container.classList.add('hide');
+    if (!this.document.classList.contains('hide'))
+      this.document.classList.add('hide');
   }
 
   toggleShow() {
-    this.container.classList.toggle('hide');
+    this.document.classList.toggle('hide');
   }
 
   getElementById(id) {
-    return this.document.getElementById(id);
+    return this.document.querySelector('#' + id);
   }
 
   getElementsByTagName(tagName) {
     return this.document.getElementsByTagName(tagName);
-  }
-
-  getElementByClassName(className) {
-    return this.document.getElementByClassName(className);
   }
 
   querySelectorAll(selector) {
@@ -66,5 +50,15 @@ module.exports = class ImportTemplate extends EventEmitter {
 
   querySelector(selector) {
     return this.document.querySelector(selector);
+  }
+
+  _onLoad() {
+    const template = this._link.import.querySelector('template');
+    this.document.appendChild(document.importNode(template.content, true));
+    this.emit('load', this);
+  }
+
+  _onError(e) {
+    this.emit('error', new Error(`No se pudo cargar el recurso "${e.target.href}"`));
   }
 };
